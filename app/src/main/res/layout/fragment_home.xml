@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full-size Player Container -->
+    <FrameLayout
+        android:id="@+id/playerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@android:color/black"
+        app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            app:resize_mode="fit"
+            app:use_controller="false" />
+
+        <!-- Controls overlay for full player -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/liveIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:background="@android:color/holo_red_dark"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:text="LIVE"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+
+            <ImageButton
+                android:id="@+id/closeButton"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="end"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Close"
+                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+        </FrameLayout>
+        <ImageView
+            android:id="@+id/centerPlayPauseIndicator"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:alpha="0"
+            android:padding="16dp"
+            android:src="@android:drawable/ic_media_pause"
+            android:visibility="invisible" />
+        <!-- Include custom controls at the bottom of the player -->
+        <include
+            android:id="@+id/playerControls"
+            layout="@layout/player_custom_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom" />
+    </FrameLayout>
+
+    <!-- Mini Player Container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/miniPlayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mini_player_height"
+        android:visibility="invisible"
+        app:cardBackgroundColor="@android:color/black"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <!-- Mini player video area -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.25">
+
+                <com.google.android.exoplayer2.ui.PlayerView
+                    android:id="@+id/miniPlayerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:resize_mode="zoom"
+                    app:use_controller="false" />
+            </FrameLayout>
+
+            <!-- Info and controls -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.75"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
+
+                <!-- Title and subtitle -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/videoTitleMini"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="Video Title"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/videoSubtitleMini"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="Live News"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Controls -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/pausePlayButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Play/Pause"
+                        android:src="@android:drawable/ic_media_pause" />
+
+                    <ImageButton
+                        android:id="@+id/expandButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Expand"
+                        android:src="@android:drawable/arrow_up_float" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Content Scroll Area -->
+    <ScrollView
+        android:id="@+id/contentScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/playerContainer">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/videoTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Sample Video Title"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/videoDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This is a description of the video. You can add any other UI elements below."
+                android:textSize="16sp" />
+
+            <!-- Additional content for scrolling -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce euismod, nunc eget ultricies ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Fusce euismod, nunc eget ultricies ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl."
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce euismod, nunc eget ultricies ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Fusce euismod, nunc eget ultricies ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl."
+                android:textSize="16sp" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

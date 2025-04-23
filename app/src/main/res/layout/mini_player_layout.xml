@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:background="#000000">
+
+    <!-- Background overlay for the minimized player -->
+    <View
+        android:id="@+id/mini_player_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0.9"/>
+
+    <!-- Reserved space for video thumbnail on the left -->
+    <FrameLayout
+        android:id="@+id/mini_player_video_container"
+        android:layout_width="110dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:background="#333333"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/mini_player_progress"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- Video title -->
+    <TextView
+        android:id="@+id/mini_player_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Video Title"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/mini_player_video_container"
+        app:layout_constraintEnd_toStartOf="@id/mini_player_play_pause"
+        app:layout_constraintBottom_toTopOf="@id/mini_player_subtitle"/>
+
+    <!-- Video subtitle -->
+    <TextView
+        android:id="@+id/mini_player_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Live News"
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintTop_toBottomOf="@id/mini_player_title"
+        app:layout_constraintStart_toEndOf="@id/mini_player_video_container"
+        app:layout_constraintEnd_toStartOf="@id/mini_player_play_pause"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Play/Pause button -->
+    <ImageButton
+        android:id="@+id/mini_player_play_pause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/baseline_play_arrow_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Play/Pause"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/mini_player_expand"
+        app:tint="#FF9800" />
+
+    <!-- Expand button -->
+    <ImageButton
+        android:id="@+id/mini_player_expand"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/baseline_keyboard_arrow_up_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Expand player"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="#FFFFFF" />
+
+    <!-- Seek progress bar -->
+    <ProgressBar
+        android:id="@+id/mini_player_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:progress="30"
+        android:progressTint="#FF9800"
+        android:background="#333333"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

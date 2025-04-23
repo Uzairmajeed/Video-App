@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/customControlsContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+   >
+
+    <SeekBar
+        android:id="@+id/customSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:thumb="@drawable/custom_thumb"
+        android:progressTint="@android:color/holo_red_dark" />
+
+    <!-- Future controls can be added here -->
+
+</FrameLayout>
