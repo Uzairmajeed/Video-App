@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -116,6 +117,33 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
     // Calculate animation values
     val videoBoxHeight = lerp(videoHeight, miniPlayerHeight, dragProgress)
     val videoBoxOffset = lerp(0.dp, containerHeightPx - miniPlayerHeight, dragProgress)
+
+    // New state variables for play/pause overlay
+    var showControls by remember { mutableStateOf(false) }
+    val controlsAlpha by animateFloatAsState(
+        targetValue = if (showControls) 1f else 0f,
+        animationSpec = tween(300)
+    )
+
+    // Handle auto-hiding of controls
+    LaunchedEffect(showControls) {
+        if (showControls) {
+            delay(1000) // Hide controls after 2 seconds
+            showControls = false
+        }
+    }
+
+    // Function to handle player view taps
+    val handlePlayerTap = {
+        // Toggle play/pause state
+        if (exoPlayer.isPlaying) {
+            exoPlayer.pause()
+        } else {
+            exoPlayer.play()
+        }
+        // Show controls
+        showControls = true
+    }
 
     // Update position periodically
     LaunchedEffect(Unit) {
@@ -282,7 +310,32 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                                 }
                             },
                             modifier = Modifier.fillMaxSize()
+                                .clickable(onClick = handlePlayerTap) // Add click listener for tap-to-pause
+
                         )
+                        // Play/Pause button overlay in center (appears when controls are shown)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .alpha(controlsAlpha),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Play/Pause button with background
+                            Box(
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clip(CircleShape)
+                                    //.background(Color.Black.copy(alpha = 0.5f))
+                                    .clickable(onClick = handlePlayerTap),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isPlaying) "⏸️" else "▶️",
+                                    fontSize = 30.sp,
+                                    color = Color.White
+                                )
+                            }
+                        }
 
                         // Custom controls overlay using our separate component
                         Box(
@@ -298,6 +351,7 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                                     // Update player position when user drags the seek bar
                                     val newPosition = (videoDuration * newProgress).toLong()
                                     exoPlayer.seekTo(newPosition)
+
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()

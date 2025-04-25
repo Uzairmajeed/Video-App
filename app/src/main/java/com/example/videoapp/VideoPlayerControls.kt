@@ -68,28 +68,80 @@ fun CustomSeekBar(
     onProgressChange: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isDragging by remember { mutableStateOf(false) }
+    var localProgress by remember { mutableStateOf(progress) }
     var trackWidth by remember { mutableStateOf(0) }
+
+    // Update local progress when external progress changes (but not while dragging)
+    LaunchedEffect(progress) {
+        if (!isDragging) {
+            localProgress = progress
+        }
+    }
 
     // Define explicit measurements
     val trackHeight = 2.dp
     val thumbSize = 10.dp
+    val touchTargetHeight = 24.dp  // Larger touch target for easier interaction
 
-    // This Box contains everything and handles size calculations
+    // This Box contains everything and handles drag gestures
     Box(
         modifier = modifier
             .onSizeChanged { size ->
                 trackWidth = size.width
             }
-            // Height matches the thumb for proper centering
-            .height(thumbSize)
+            .height(touchTargetHeight)
             .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragStart = {
+                        isDragging = true
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        // Only call onProgressChange at the end of the drag
+                        onProgressChange(localProgress)
+                    },
+                    onDragCancel = {
+                        isDragging = false
+                        // Reset to the last known progress value
+                        localProgress = progress
+                    },
+                    onHorizontalDrag = { change, _ ->
+                        change.consume()
+                        if (trackWidth > 0) {
+                            // Update local progress during drag
+                            localProgress = (change.position.x / trackWidth).coerceIn(0f, 1f)
+                        }
+                    }
+                )
+            }
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    if (trackWidth > 0) {
+                        localProgress = (offset.x / trackWidth).coerceIn(0f, 1f)
+                        // For taps, immediately update the external progress
+                        onProgressChange(localProgress)
+                    }
+                }
+            },
+        contentAlignment = Alignment.Center
     ) {
+        // Track background (grey)
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .height(trackHeight)
+                .clip(RoundedCornerShape(trackHeight / 2))
+                .background(Color.DarkGray.copy(alpha = 0.5f))
+        )
 
         // Progress track (red)
         Box(
             modifier = Modifier
-                .align(Alignment.CenterStart) // Align to left center
-                .fillMaxWidth(progress)
+                .align(Alignment.CenterStart)
+                .fillMaxWidth(localProgress)  // Use local progress for immediate visual feedback
                 .height(trackHeight)
                 .clip(RoundedCornerShape(trackHeight / 2))
                 .background(Color.Red)
@@ -98,8 +150,8 @@ fun CustomSeekBar(
         // Thumb
         if (trackWidth > 0) {
             val thumbOffset = with(LocalDensity.current) {
-                // Calculate offset based on progress, accounting for thumb width
-                (trackWidth * progress - thumbSize.toPx() / 2).coerceAtLeast(0f).toDp()
+                // Calculate offset based on local progress
+                (trackWidth * localProgress - thumbSize.toPx() / 2).coerceAtLeast(0f).toDp()
             }
 
             Box(
@@ -109,32 +161,8 @@ fun CustomSeekBar(
                     .clip(CircleShape)
                     .background(Color.Red)
                     .align(Alignment.CenterStart)
-                    // Add shadow for depth
             )
         }
-
-        // Touch area (invisible, for better interaction)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {},
-                        onDragStart = {},
-                        onHorizontalDrag = { change, _ ->
-                            change.consume()
-                            val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
-                            onProgressChange(newProgress)
-                        }
-                    )
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures { offset ->
-                        val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
-                        onProgressChange(newProgress)
-                    }
-                }
-        )
     }
 }
 /**
