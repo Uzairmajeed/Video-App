@@ -472,7 +472,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    // Add this runnable for updating the seek bar
+    // For updating the seek bar
     private val updateSeekBarRunnable = object : Runnable {
         override fun run() {
             if (player != null && !isDraggingSeekBar) {

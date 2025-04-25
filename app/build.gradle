@@ -88,7 +88,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.19.1'  // ← If you're not on Media3
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.19.1'
 
-
+    //For coroutines
     implementation libs.kotlinx.coroutines.android
 
 

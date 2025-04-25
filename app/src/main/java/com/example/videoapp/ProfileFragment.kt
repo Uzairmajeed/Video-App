@@ -109,10 +109,24 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
     var isPlaying by remember { mutableStateOf(true) }
     var isAtLiveEdge by remember { mutableStateOf(true) }
 
+    // Track current position and duration for seekbar
+    var videoProgress by remember { mutableStateOf(0f) }
+    var videoDuration by remember { mutableStateOf(0L) }
+
     // Calculate animation values
     val videoBoxHeight = lerp(videoHeight, miniPlayerHeight, dragProgress)
     val videoBoxOffset = lerp(0.dp, containerHeightPx - miniPlayerHeight, dragProgress)
 
+    // Update position periodically
+    LaunchedEffect(Unit) {
+        while (true) {
+            val position = exoPlayer.currentPosition
+            val duration = exoPlayer.duration.coerceAtLeast(1L)
+            videoProgress = (position / duration.toFloat()).coerceIn(0f, 1f)
+            videoDuration = duration
+            delay(500) // Update every half second
+        }
+    }
 
     // Live edge check
     LaunchedEffect(Unit) {
@@ -150,6 +164,12 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlayingNow: Boolean) {
                 isPlaying = isPlayingNow
+            }
+
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_READY) {
+                    videoDuration = exoPlayer.duration.coerceAtLeast(1L)
+                }
             }
         }
         exoPlayer.addListener(listener)
@@ -243,13 +263,13 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                             .fillMaxSize()
                             .alpha(1f - dragProgress * 2f)
                     ) {
-                        // Dedicated full-size player
+                        // Dedicated full-size player with custom controls
                         AndroidView(
                             factory = { ctx ->
                                 // Create a completely separate PlayerView for full mode
                                 PlayerView(ctx).apply {
                                     setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
-                                    useController = true
+                                    useController = false // Disable default controllers
                                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                                     setShutterBackgroundColor(android.graphics.Color.BLACK)
                                     player = exoPlayer
@@ -264,6 +284,28 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                             modifier = Modifier.fillMaxSize()
                         )
 
+                        // Custom controls overlay using our separate component
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                                //.padding(bottom = 15.dp),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            // Using the custom seekbar from our separate file
+                            CustomSeekBar(
+                                progress = videoProgress,
+                                onProgressChange = { newProgress ->
+                                    // Update player position when user drags the seek bar
+                                    val newPosition = (videoDuration * newProgress).toLong()
+                                    exoPlayer.seekTo(newPosition)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 6.dp)
+                                    .height(15.dp)
+                            )
+                        }
+
                         // LIVE badge and close button overlay
                         Row(
                             modifier = Modifier
@@ -272,18 +314,14 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                                 .zIndex(12f),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(if (isAtLiveEdge) Color.Red else Color.DarkGray)
-                                    .clickable {
-                                        exoPlayer.seekToDefaultPosition()
-                                        exoPlayer.playWhenReady = true
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Text(text = "LIVE", color = Color.White, fontSize = 13.sp)
-                            }
+                            // Using the LiveBadge component from our separate file
+                            LiveBadge(
+                                isAtLiveEdge = isAtLiveEdge,
+                                onLiveClick = {
+                                    exoPlayer.seekToDefaultPosition()
+                                    exoPlayer.playWhenReady = true
+                                }
+                            )
 
                             Text(
                                 text = "❌",
