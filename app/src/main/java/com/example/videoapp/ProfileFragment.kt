@@ -1,5 +1,6 @@
 package com.example.videoapp
 
+import OtherContents
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -243,10 +244,8 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                     .background(Color.Gray),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Main Content Area",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontSize = 22.sp)
-                )
+                OtherContents()
+
             }
         }
 
