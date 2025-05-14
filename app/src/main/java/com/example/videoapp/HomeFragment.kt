@@ -19,10 +19,13 @@ import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -68,6 +71,9 @@ class HomeFragment : Fragment() {
     private var isDraggingSeekBar = false
     private val seekBarUpdateHandler = Handler(Looper.getMainLooper())
     private var isLiveContent = true
+
+    private val categoryList = listOf("TV Shows", "Movies", "Recent", "Live", "Recommended")
+
 
     private val TAG = "BlankFragment"
 
@@ -119,7 +125,20 @@ class HomeFragment : Fragment() {
         setupInitialState()
         setupListeners()
 
+        setupCategoryRecyclerView()
+
     }
+
+    private fun setupCategoryRecyclerView() {
+        val recyclerView = view?.findViewById<RecyclerView>(R.id.showCategoryRecyclerView)
+        recyclerView?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        recyclerView?.adapter = ShowCategoryAdapter(categoryList) { selectedCategory ->
+            Toast.makeText(requireContext(), "Selected: $selectedCategory", Toast.LENGTH_SHORT).show()
+            // 🔥 Add filtering logic here later
+        }
+    }
+
+
 
     /**
      * onStart - Fragment lifecycle method where we initialize the player

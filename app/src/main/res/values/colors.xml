@@ -3,4 +3,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="bottom_nav_background">#1E1E1E</color> <!-- or whatever matches your image -->
+
+    <color name="gray_dark">#2C2C2C</color>
 </resources>
