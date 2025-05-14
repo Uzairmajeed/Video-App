@@ -126,7 +126,7 @@ class HomeFragment : Fragment() {
         setupListeners()
 
         setupCategoryRecyclerView()
-
+        setupTimeSlots()
     }
 
     private fun setupCategoryRecyclerView() {
@@ -137,6 +137,13 @@ class HomeFragment : Fragment() {
             // 🔥 Add filtering logic here later
         }
     }
+
+    private fun setupTimeSlots() {
+        val timeRecycler = view?.findViewById<RecyclerView>(R.id.timeSlotRecyclerView)
+        timeRecycler?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        timeRecycler?.adapter = TimeSlotAdapter(MediaDataProvider.timePeriods)
+    }
+
 
 
 
