@@ -27,6 +27,23 @@ import androidx.compose.ui.unit.sp
 import com.example.videoapp.VideoSelectionListener
 import kotlinx.coroutines.delay
 
+
+data class ShowCategory(
+    val id: String,
+    val label: String,
+    val isSelected: Boolean = false
+)
+
+
+val categories = listOf(
+        ShowCategory("1", "TV Shows"),
+        ShowCategory("2", "Movies"),
+        ShowCategory("3", "Recent"),
+        ShowCategory("4", "Live"),
+        ShowCategory("5", "Recommended")
+    )
+
+
 // Data Class To Represent A Media Item
 data class MediaItem(
     val id: String,
@@ -47,6 +64,8 @@ data class TimePeriod(
 )
 
 //  Dummy Data Structure For Different Time Periods
+// Dummy Data Provider
+object MediaDataProvider {
 val timePeriods = listOf(
     TimePeriod(
         time = "Now 4:30 pm",
@@ -198,13 +217,17 @@ val timePeriods = listOf(
         )
     )
 )
+}
 
 
 //This Composable  Is For Other Contents Of Profile Fragment ..Showing List Of Videos Under Different Time Slots
 @Composable
 fun OtherContents(videoSelectionListener: VideoSelectionListener) {
     var selectedItemId by remember { mutableStateOf<String?>(null) }
+    var selectedCategoryId by remember { mutableStateOf(categories.first().id) }
 
+
+    var timePeriods = MediaDataProvider.timePeriods
     // Automatically select the first item when the UI is first composed
     LaunchedEffect(Unit) {
         if (timePeriods.isNotEmpty() && timePeriods[0].shows.isNotEmpty()) {
@@ -220,50 +243,60 @@ fun OtherContents(videoSelectionListener: VideoSelectionListener) {
             .fillMaxSize()
             .background(Color(0xFF121212)) // Dark background similar to the image
     ) {
-        // Horizontal scrollable container for time periods and their content
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .horizontalScroll(rememberScrollState())
-        ) {
-            // For each time period, create a column with its shows
-            timePeriods.forEach { timePeriod ->
-                Column(
-                    modifier = Modifier
-                        .width(300.dp) // Fixed width for each time period column
-                        .fillMaxHeight()
-                ) {
-                    // Time period header
-                    Text(
-                        text = timePeriod.time,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
+        Column {
+            // 🔹 Insert Chips ABOVE the time section
+            ShowCategoryChips(
+                categories = categories,
+                selectedCategoryId = selectedCategoryId,
+                onCategorySelected = { selectedCategoryId = it.id }
+            )
+            // Horizontal scrollable container for time periods and their content
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                // For each time period, create a column with its shows
+                timePeriods.forEach { timePeriod ->
+                    Column(
                         modifier = Modifier
-                            .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
-                    )
-
-                    // Shows for this time period
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .width(300.dp) // Fixed width for each time period column
+                            .fillMaxHeight()
                     ) {
-                        items(timePeriod.shows) { show ->
-                            MediaListItem(
-                                mediaItem = show,
-                                isSelected = show.id == selectedItemId,
-                                is430PM = timePeriod.time.contains("4:30"),
-                                onClick = {
-                                    selectedItemId = show.id
-                                    videoSelectionListener.onVideoSelected(show.videoUrl)
-                                }
-                            )
+                        // Time period header
+                        Text(
+                            text = timePeriod.time,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier
+                                .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                        )
+
+                        // Shows for this time period
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(timePeriod.shows) { show ->
+                                MediaListItem(
+                                    mediaItem = show,
+                                    isSelected = show.id == selectedItemId,
+                                    is430PM = timePeriod.time.contains("4:30"),
+                                    onClick = {
+                                        selectedItemId = show.id
+                                        videoSelectionListener.onVideoSelected(show.videoUrl)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+
+
     }
 }
 
@@ -373,6 +406,43 @@ fun MediaListItem(
                         textAlign = TextAlign.End
                     )
                 }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun ShowCategoryChips(
+    categories: List<ShowCategory>,
+    selectedCategoryId: String?,
+    onCategorySelected: (ShowCategory) -> Unit
+) {
+    val scrollState = rememberScrollState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState)
+            .padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        categories.forEach { category ->
+            val isSelected = category.id == selectedCategoryId
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(if (isSelected) Color.White else Color(0xFF2C2C2C))
+                    .clickable { onCategorySelected(category) }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = category.label,
+                    color = if (isSelected) Color.Black else Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
+                )
             }
         }
     }
