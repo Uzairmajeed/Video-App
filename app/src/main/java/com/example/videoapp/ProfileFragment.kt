@@ -45,7 +45,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// Define a callback interface to handle video selection
+// Callback interface used to update the video URL when user selects a new video
 interface VideoSelectionListener {
     fun onVideoSelected(videoUrl: String)
 }
@@ -58,10 +58,11 @@ class ProfileFragment : Fragment(), VideoSelectionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Create the player instance here
-        initializePlayer()
+        initializePlayer() // Initialize ExoPlayer when fragment is created
     }
 
+
+    // Callback interface used to update the video URL when user selects a new video
     private fun initializePlayer() {
         exoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
             val mediaItem = MediaItem.Builder()
@@ -74,7 +75,7 @@ class ProfileFragment : Fragment(), VideoSelectionListener {
                 .build()
             setMediaItem(mediaItem)
             prepare()
-            playWhenReady = true
+            playWhenReady = true // Ensures auto-play on load
             play() // Add explicit play call to ensure playback starts
 
         }
@@ -99,11 +100,11 @@ class ProfileFragment : Fragment(), VideoSelectionListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        exoPlayer?.release()
+        exoPlayer?.release() // Always release player to free resources
         exoPlayer = null
     }
 
-    // Implementation of VideoSelectionListener
+    // Triggered when user selects a video from OtherContents
     override fun onVideoSelected(videoUrl: String) {
         currentVideoUrl = videoUrl
 
@@ -141,19 +142,21 @@ fun ProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
 
-    // Screen dimensions
+    // Screen width for responsive layout
     val screenWidth = configuration.screenWidthDp.dp
 
-    // Video dimensions
+    // Calculating video height based on 16:9 aspect ratio
     val videoHeight = (screenWidth * 9f) / 16f
     val miniPlayerHeight = 60.dp
 
-    // Track container size for calculations
+    // Capture screen/container size to adjust draggable behavior
     var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
     val containerHeightPx = with(density) { containerSize.height.toDp() }
 
-    // Animation state
+    // Controls whether the video is expanded or minimized
     var dragProgress by remember { mutableStateOf(0f) }
+
+    // Playback & UI state
     var isPlaying by remember { mutableStateOf(true) }
     var isAtLiveEdge by remember { mutableStateOf(true) }
 
@@ -161,18 +164,18 @@ fun ProfileScreen(
     var videoProgress by remember { mutableStateOf(0f) }
     var videoDuration by remember { mutableStateOf(0L) }
 
-    // Calculate animation values
+    // Interpolated dimensions for animation
     val videoBoxHeight = lerp(videoHeight, miniPlayerHeight, dragProgress)
     val videoBoxOffset = lerp(0.dp, containerHeightPx - miniPlayerHeight, dragProgress)
 
-    // New state variables for play/pause overlay
+    // Overlay controls logic
     var showControls by remember { mutableStateOf(false) }
     val controlsAlpha by animateFloatAsState(
         targetValue = if (showControls) 1f else 0f,
         animationSpec = tween(300)
     )
 
-    // Handle auto-hiding of controls
+    // Auto-hide overlay controls after 1 second
     LaunchedEffect(showControls) {
         if (showControls) {
             delay(1000) // Hide controls after 1 second
@@ -180,7 +183,7 @@ fun ProfileScreen(
         }
     }
 
-    // Function to handle player view taps
+    // Tap-to-toggle playback and show controls
     val handlePlayerTap = {
         // Toggle play/pause state
         if (exoPlayer.isPlaying) {
@@ -192,7 +195,7 @@ fun ProfileScreen(
         showControls = true
     }
 
-    // Update position periodically
+    // Continuously track current video position and duration
     LaunchedEffect(Unit) {
         while (true) {
             val position = exoPlayer.currentPosition
@@ -203,7 +206,7 @@ fun ProfileScreen(
         }
     }
 
-    // Live edge check
+    // Determine if user is near the live edge (for live streams)
     LaunchedEffect(Unit) {
         while (true) {
             val timeline = exoPlayer.currentTimeline
@@ -221,7 +224,7 @@ fun ProfileScreen(
         }
     }
 
-    // Player lifecycle management
+    // Pause playback when app goes background
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
@@ -234,7 +237,7 @@ fun ProfileScreen(
         }
     }
 
-    // Player state listener
+    // Track player state and update play/pause UI
     DisposableEffect(Unit) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlayingNow: Boolean) {
@@ -253,7 +256,7 @@ fun ProfileScreen(
         }
     }
 
-    // Animation helper function
+    // Helper function to animate between minimized/full video
     fun animateDragTo(targetValue: Float) {
         coroutineScope.launch {
             val animSpec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
@@ -265,6 +268,8 @@ fun ProfileScreen(
         }
     }
 
+
+    // Root container
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -283,7 +288,7 @@ fun ProfileScreen(
                 )
             }
 
-            // Content below video - expands to fill entire space when video is minimized
+            // Placeholder for rest of UI content (news, social, etc.)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -535,7 +540,8 @@ fun ProfileScreen(
     }
 }
 
-// Linear interpolation helper for dp values
+
+// Helper for interpolating height/offset values based on drag progress
 private fun lerp(start: androidx.compose.ui.unit.Dp, stop: androidx.compose.ui.unit.Dp, fraction: Float): androidx.compose.ui.unit.Dp {
     return start + ((stop - start) * fraction)
 }

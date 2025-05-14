@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -28,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.videoapp.VideoSelectionListener
 import kotlinx.coroutines.delay
 
-// Data class to represent a media item
+// Data Class To Represent A Media Item
 data class MediaItem(
     val id: String,
     val title: String,
@@ -41,13 +40,13 @@ data class MediaItem(
     val videoUrl: String
 )
 
-// Time periods with their shows
+// Time Periods With Their Shows
 data class TimePeriod(
     val time: String,
     val shows: List<MediaItem>
 )
 
-// Create the data structure for different time periods
+//  Dummy Data Structure For Different Time Periods
 val timePeriods = listOf(
     TimePeriod(
         time = "Now 4:30 pm",
@@ -200,6 +199,8 @@ val timePeriods = listOf(
     )
 )
 
+
+//This Composable  Is For Other Contents Of Profile Fragment ..Showing List Of Videos Under Different Time Slots
 @Composable
 fun OtherContents(videoSelectionListener: VideoSelectionListener) {
     var selectedItemId by remember { mutableStateOf<String?>(null) }
@@ -266,6 +267,8 @@ fun OtherContents(videoSelectionListener: VideoSelectionListener) {
     }
 }
 
+
+// This Composable Is  For each item ..Having Also Thumbnail For Initial Time Only ..
 @Composable
 fun MediaListItem(
     mediaItem: MediaItem,
@@ -273,56 +276,61 @@ fun MediaListItem(
     is430PM: Boolean,
     onClick: () -> Unit
 ) {
-    val borderModifier = if (isSelected) {
-        Modifier.border(width = 2.dp, color = Color.Red, shape = RoundedCornerShape(8.dp))
-    } else {
-        Modifier
-    }
-
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(60.dp)
             .padding(horizontal = 8.dp)
-            .then(borderModifier)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF1E1E1E))
-            .clickable(onClick = onClick)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp)
-        ) {
-            // Channel logo/thumbnail - only for 4:30 PM time slot
-            if (is430PM) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Color(0xFF2A2A2A)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Here you would load the actual logo image in a real app
-                    // For now we use the icon as placeholder
-                    Icon(
-                        imageVector = mediaItem.thumbnailIcon,
-                        contentDescription = "${mediaItem.channel} logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
+        // Channel logo/thumbnail - only for 4:30 PM time slot
+        if (is430PM) {
+            // Separate thumbnail box with its own styling
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isSelected) Color.Red else Color(0xFF3B3A46)) // Purple background, Red when selected
+                    .clickable(onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                // Display channel name or brand
+                Text(
+                    text = mediaItem.channel.split(" ").firstOrNull() ?: "",
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(4.dp)
+                )
             }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
 
-            // Text content
+        // Content box (separate from thumbnail)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(80.dp)
+                .let {
+                    if (isSelected) {
+                        it.border(width = 2.dp, color = Color.Red, shape = RoundedCornerShape(8.dp))
+                    } else {
+                        it
+                    }
+                }
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFF1E1E1E))
+                .clickable(onClick = onClick)
+        ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Text(
                     text = mediaItem.title,
                     color = Color.White,
