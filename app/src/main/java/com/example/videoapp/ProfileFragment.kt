@@ -14,7 +14,6 @@ import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -46,15 +45,27 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ProfileFragment : Fragment() {
+// Define a callback interface to handle video selection
+interface VideoSelectionListener {
+    fun onVideoSelected(videoUrl: String)
+}
+
+class ProfileFragment : Fragment(), VideoSelectionListener {
     private var exoPlayer: ExoPlayer? = null
+
+    // Current video URL state
+    private var currentVideoUrl = "https://live-hls-web-aje.getaj.net/AJE/01.m3u8"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Create the player instance here
+        initializePlayer()
+    }
+
+    private fun initializePlayer() {
         exoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
             val mediaItem = MediaItem.Builder()
-                .setUri(Uri.parse("https://live-hls-web-aje.getaj.net/AJE/01.m3u8"))
+                .setUri(Uri.parse(currentVideoUrl))
                 .setLiveConfiguration(
                     MediaItem.LiveConfiguration.Builder()
                         .setMaxPlaybackSpeed(1.02f)
@@ -64,6 +75,8 @@ class ProfileFragment : Fragment() {
             setMediaItem(mediaItem)
             prepare()
             playWhenReady = true
+            play() // Add explicit play call to ensure playback starts
+
         }
     }
 
@@ -75,7 +88,10 @@ class ProfileFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 exoPlayer?.let { player ->
-                    ProfileScreen(player)
+                    ProfileScreen(
+                        exoPlayer = player,
+                        videoSelectionListener = this@ProfileFragment
+                    )
                 }
             }
         }
@@ -86,10 +102,40 @@ class ProfileFragment : Fragment() {
         exoPlayer?.release()
         exoPlayer = null
     }
+
+    // Implementation of VideoSelectionListener
+    override fun onVideoSelected(videoUrl: String) {
+        currentVideoUrl = videoUrl
+
+        // Update the player with the new URL
+        exoPlayer?.let { player ->
+            // Always start playing new videos
+            val shouldPlay = true // Force play for new selections
+
+            // Create new media item with the selected URL
+            val mediaItem = MediaItem.Builder()
+                .setUri(Uri.parse(videoUrl))
+                .build()
+
+            // Clear current media and set the new one
+            player.clearMediaItems()
+            player.setMediaItem(mediaItem)
+
+            // Prepare and restore playback state
+            player.prepare()
+            player.playWhenReady = shouldPlay
+            if (shouldPlay) {
+                player.play() // Explicitly call play to ensure playback starts
+            }
+        }
+    }
 }
 
 @Composable
-fun ProfileScreen(exoPlayer: ExoPlayer) {
+fun ProfileScreen(
+    exoPlayer: ExoPlayer,
+    videoSelectionListener: VideoSelectionListener
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
@@ -129,7 +175,7 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
     // Handle auto-hiding of controls
     LaunchedEffect(showControls) {
         if (showControls) {
-            delay(1000) // Hide controls after 2 seconds
+            delay(1000) // Hide controls after 1 second
             showControls = false
         }
     }
@@ -244,8 +290,8 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                     .background(Color.Gray),
                 contentAlignment = Alignment.Center
             ) {
-                OtherContents()
-
+                // Pass the videoSelectionListener to OtherContents
+                OtherContents(videoSelectionListener)
             }
         }
 
@@ -340,7 +386,7 @@ fun ProfileScreen(exoPlayer: ExoPlayer) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize(),
-                                //.padding(bottom = 15.dp),
+                            //.padding(bottom = 15.dp),
                             contentAlignment = Alignment.BottomCenter
                         ) {
                             // Using the custom seekbar from our separate file
