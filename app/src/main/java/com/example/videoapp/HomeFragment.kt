@@ -1,5 +1,6 @@
 package com.example.videoapp
 
+import MediaItemList
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -35,6 +36,11 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+
+
+interface VideoSelectionListenerForHome {
+    fun onVideoSelected(mediaItem: MediaItemList)
+}
 
 class HomeFragment : Fragment() {
 
@@ -72,7 +78,7 @@ class HomeFragment : Fragment() {
     private val seekBarUpdateHandler = Handler(Looper.getMainLooper())
     private var isLiveContent = true
 
-    private var selectedVideoUrl: String? = null
+    private var selectedMediaItem: MediaItemList? = null
     private lateinit var timeSlotAdapter: TimeSlotAdapter
     private val categoryList = listOf("TV Shows", "Movies", "Recent", "Live", "Recommended")
 
@@ -144,26 +150,23 @@ class HomeFragment : Fragment() {
         val timeRecycler = view?.findViewById<RecyclerView>(R.id.timeSlotRecyclerView)
         timeRecycler?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        val videoListener = object : VideoSelectionListener {
-            override fun onVideoSelected(videoUrl: String) {
-                selectedVideoUrl = videoUrl
-                playSelectedVideo(videoUrl)
+        val videoListener = object : VideoSelectionListenerForHome {
+            override fun onVideoSelected(mediaItem: MediaItemList) {
+                selectedMediaItem = mediaItem
+                playSelectedVideo(mediaItem.videoUrl)
 
-                // 🔁 Update adapter highlighting
-                timeSlotAdapter.updateSelectedUrl(videoUrl)
+                // 🔁 Update adapter UI
+                timeSlotAdapter.updateSelectedItem(mediaItem)
             }
         }
 
-        // ✅ Auto-select first video
-        selectedVideoUrl = MediaDataProvider.timePeriods.firstOrNull()
-            ?.shows?.firstOrNull()?.videoUrl
+        // ✅ Select the first video initially
+        selectedMediaItem = MediaDataProvider.timePeriods.firstOrNull()?.shows?.firstOrNull()
 
-        // 🔁 Adapter with selection state
-        timeSlotAdapter = TimeSlotAdapter(MediaDataProvider.timePeriods, videoListener, selectedVideoUrl)
+        timeSlotAdapter = TimeSlotAdapter(MediaDataProvider.timePeriods, videoListener, selectedMediaItem)
         timeRecycler?.adapter = timeSlotAdapter
 
-        // Play first video
-        selectedVideoUrl?.let { playSelectedVideo(it) }
+        selectedMediaItem?.let { playSelectedVideo(it.videoUrl) }
     }
 
 

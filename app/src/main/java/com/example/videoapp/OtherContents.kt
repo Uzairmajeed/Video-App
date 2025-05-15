@@ -45,7 +45,7 @@ val categories = listOf(
 
 
 // Data Class To Represent A Media Item
-data class MediaItem(
+data class MediaItemList(
     val id: String,
     val title: String,
     val channel: String,
@@ -60,7 +60,7 @@ data class MediaItem(
 // Time Periods With Their Shows
 data class TimePeriod(
     val time: String,
-    val shows: List<MediaItem>
+    val shows: List<MediaItemList>
 )
 
 //  Dummy Data Structure For Different Time Periods
@@ -70,7 +70,7 @@ val timePeriods = listOf(
     TimePeriod(
         time = "Now 4:30 pm",
         shows = listOf(
-            MediaItem(
+            MediaItemList(
                 id = "1",
                 title = "S02 E01 - Animal Mealtime",
                 channel = "Brave Wilderness",
@@ -81,7 +81,7 @@ val timePeriods = listOf(
                 timeRemaining = "15m left",
                 videoUrl = "https://live-hls-web-aje.getaj.net/AJE/01.m3u8"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "2",
                 title = "Kitchen Delight",
                 channel = "Tastomade",
@@ -92,7 +92,7 @@ val timePeriods = listOf(
                 timeRemaining = "8m left",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "3",
                 title = "S04 E08 - Beyond Belief: Fact or Fiction",
                 channel = "Beyond Belief",
@@ -103,7 +103,7 @@ val timePeriods = listOf(
                 timeRemaining = "8m left",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "4",
                 title = "Watts Up for the Holidays",
                 channel = "GustoTV",
@@ -114,7 +114,7 @@ val timePeriods = listOf(
                 timeRemaining = "7m left",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "5",
                 title = "S04 E08 - In the Hands of Giants",
                 channel = "Homicide City",
@@ -132,7 +132,7 @@ val timePeriods = listOf(
     TimePeriod(
         time = "5:00 pm",
         shows = listOf(
-            MediaItem(
+            MediaItemList(
                 id = "6",
                 title = "S02 E02 - Stung by a Warrior Wasp",
                 channel = "Brave Wilderness",
@@ -143,7 +143,7 @@ val timePeriods = listOf(
                 timeRemaining = "30m",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "7",
                 title = "Two for the Prize",
                 channel = "Food Network",
@@ -154,7 +154,7 @@ val timePeriods = listOf(
                 timeRemaining = "30m",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "8",
                 title = "S04 E09 - Beyond Reproach",
                 channel = "Beyond Belief",
@@ -165,7 +165,7 @@ val timePeriods = listOf(
                 timeRemaining = "30m",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "9",
                 title = "Flour Power Holiday Specials",
                 channel = "GustoTV",
@@ -176,7 +176,7 @@ val timePeriods = listOf(
                 timeRemaining = "30m",
                 videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "10",
                 title = "S04 E09 - Lie Down with Dogs",
                 channel = "Homicide City",
@@ -192,7 +192,7 @@ val timePeriods = listOf(
     TimePeriod(
         time = "6:00 pm",
         shows = listOf(
-            MediaItem(
+            MediaItemList(
                 id = "11",
                 title = "Live AlJazeera News",
                 channel = "AlJazeera",
@@ -203,7 +203,7 @@ val timePeriods = listOf(
                 timeRemaining = "Live",
                 videoUrl = "https://live-hls-web-aje.getaj.net/AJE/01.m3u8"
             ),
-            MediaItem(
+            MediaItemList(
                 id = "12",
                 title = "Into the Wild Season Finale",
                 channel = "National Geographic",
@@ -281,7 +281,7 @@ fun OtherContents(videoSelectionListener: VideoSelectionListener) {
                         ) {
                             items(timePeriod.shows) { show ->
                                 MediaListItem(
-                                    mediaItem = show,
+                                    mediaItemList = show,
                                     isSelected = show.id == selectedItemId,
                                     is430PM = timePeriod.time.contains("4:30"),
                                     onClick = {
@@ -304,7 +304,7 @@ fun OtherContents(videoSelectionListener: VideoSelectionListener) {
 // This Composable Is  For each item ..Having Also Thumbnail For Initial Time Only ..
 @Composable
 fun MediaListItem(
-    mediaItem: MediaItem,
+    mediaItemList: MediaItemList,
     isSelected: Boolean,
     is430PM: Boolean,
     onClick: () -> Unit
@@ -328,7 +328,7 @@ fun MediaListItem(
             ) {
                 // Display channel name or brand
                 Text(
-                    text = mediaItem.channel.split(" ").firstOrNull() ?: "",
+                    text = mediaItemList.channel.split(" ").firstOrNull() ?: "",
                     color = Color.White,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -365,7 +365,7 @@ fun MediaListItem(
             ) {
 
                 Text(
-                    text = mediaItem.title,
+                    text = mediaItemList.title,
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
@@ -375,7 +375,7 @@ fun MediaListItem(
                 )
 
                 Text(
-                    text = mediaItem.channel,
+                    text = mediaItemList.channel,
                     color = Color.Gray,
                     fontSize = 13.sp,
                     fontStyle = FontStyle.Italic,
@@ -390,7 +390,7 @@ fun MediaListItem(
                         .padding(bottom = 8.dp)
                 ) {
                     LinearProgressIndicator(
-                        progress = mediaItem.progress,
+                        progress = mediaItemList.progress,
                         modifier = Modifier
                             .weight(1f)
                             .height(4.dp),
@@ -399,7 +399,7 @@ fun MediaListItem(
                     )
 
                     Text(
-                        text = mediaItem.timeRemaining,
+                        text = mediaItemList.timeRemaining,
                         color = Color.Gray,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 8.dp),
