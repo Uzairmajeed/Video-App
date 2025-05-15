@@ -137,6 +137,7 @@ class HomeFragment : Fragment() {
         setupTimeSlots()
     }
 
+    //This  function  is for setting the main recyclerview
     private fun setupCategoryRecyclerView() {
         val recyclerView = view?.findViewById<RecyclerView>(R.id.showCategoryRecyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -146,6 +147,7 @@ class HomeFragment : Fragment() {
     }
 
 
+    //This function is for setting the timeslots its and their corresponding list
     private fun setupTimeSlots() {
         val timeRecycler = view?.findViewById<RecyclerView>(R.id.timeSlotRecyclerView)
         timeRecycler?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -170,6 +172,7 @@ class HomeFragment : Fragment() {
     }
 
 
+    //This  method is used for  on item select video change
     private fun playSelectedVideo(videoUrl: String) {
         player?.let { exoPlayer ->
             val mediaItem = MediaItem.Builder()
