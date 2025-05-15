@@ -8,8 +8,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class TimeSlotAdapter(private val timePeriods: List<TimePeriod>) :
-    RecyclerView.Adapter<TimeSlotAdapter.TimeSlotViewHolder>() {
+class TimeSlotAdapter(
+    private val timePeriods: List<TimePeriod>,
+    private val listener: VideoSelectionListener,
+    private var selectedVideoUrl: String? // <== Pass from fragment
+) : RecyclerView.Adapter<TimeSlotAdapter.TimeSlotViewHolder>() {
+
+    fun updateSelectedUrl(url: String) {
+        selectedVideoUrl = url
+        notifyDataSetChanged()
+    }
 
     class TimeSlotViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val timeTextView: TextView = view.findViewById(R.id.timeTextView)
@@ -28,9 +36,10 @@ class TimeSlotAdapter(private val timePeriods: List<TimePeriod>) :
         val period = timePeriods[position]
         holder.timeTextView.text = period.time
 
+        val adapter = MediaItemAdapter(period.shows, listener, selectedVideoUrl ?: "")
         holder.mediaRecycler.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            adapter = MediaItemAdapter(period.shows)
+            this.adapter = adapter
             setHasFixedSize(true)
         }
     }

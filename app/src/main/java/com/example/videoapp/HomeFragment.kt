@@ -72,6 +72,8 @@ class HomeFragment : Fragment() {
     private val seekBarUpdateHandler = Handler(Looper.getMainLooper())
     private var isLiveContent = true
 
+    private var selectedVideoUrl: String? = null
+    private lateinit var timeSlotAdapter: TimeSlotAdapter
     private val categoryList = listOf("TV Shows", "Movies", "Recent", "Live", "Recommended")
 
 
@@ -133,16 +135,62 @@ class HomeFragment : Fragment() {
         val recyclerView = view?.findViewById<RecyclerView>(R.id.showCategoryRecyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         recyclerView?.adapter = ShowCategoryAdapter(categoryList) { selectedCategory ->
-            Toast.makeText(requireContext(), "Selected: $selectedCategory", Toast.LENGTH_SHORT).show()
             // 🔥 Add filtering logic here later
         }
     }
 
+
     private fun setupTimeSlots() {
         val timeRecycler = view?.findViewById<RecyclerView>(R.id.timeSlotRecyclerView)
         timeRecycler?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        timeRecycler?.adapter = TimeSlotAdapter(MediaDataProvider.timePeriods)
+
+        val videoListener = object : VideoSelectionListener {
+            override fun onVideoSelected(videoUrl: String) {
+                selectedVideoUrl = videoUrl
+                playSelectedVideo(videoUrl)
+
+                // 🔁 Update adapter highlighting
+                timeSlotAdapter.updateSelectedUrl(videoUrl)
+            }
+        }
+
+        // ✅ Auto-select first video
+        selectedVideoUrl = MediaDataProvider.timePeriods.firstOrNull()
+            ?.shows?.firstOrNull()?.videoUrl
+
+        // 🔁 Adapter with selection state
+        timeSlotAdapter = TimeSlotAdapter(MediaDataProvider.timePeriods, videoListener, selectedVideoUrl)
+        timeRecycler?.adapter = timeSlotAdapter
+
+        // Play first video
+        selectedVideoUrl?.let { playSelectedVideo(it) }
     }
+
+
+    private fun playSelectedVideo(videoUrl: String) {
+        player?.let { exoPlayer ->
+            val mediaItem = MediaItem.Builder()
+                .setUri(Uri.parse(videoUrl))
+                .setLiveConfiguration(
+                    MediaItem.LiveConfiguration.Builder()
+                        .setMaxPlaybackSpeed(1.02f)
+                        .build()
+                )
+                .build()
+
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = true
+
+            // Force expanded player
+            animateToExpandedPlayer()
+
+            // Optional: reset live state
+            isAtLiveEdge = true
+            updateLiveIndicator()
+        }
+    }
+
 
 
 
